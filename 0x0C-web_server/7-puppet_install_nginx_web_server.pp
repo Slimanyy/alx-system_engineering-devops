@@ -1,4 +1,4 @@
-#setup nginx
+#setup nginx for 301 redirect page"
 
 package {
     'nginx':
