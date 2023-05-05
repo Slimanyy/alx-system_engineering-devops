@@ -1,0 +1,53 @@
+global
+    log 127.0.0.1 local0 notice
+    maxconn 2000
+    user haproxy
+    group haproxy
+
+defaults
+    log     global
+    mode    http
+    option  httplog
+    option  dontlognull
+    retries 3
+    option redispatch
+    timeout connect  5000
+    timeout client  10000
+    timeout server  10000
+
+listen hbnb
+    bind 0.0.0.0:80
+    mode http
+    stats enable
+    stats uri /haproxy?stats
+    balance roundrobin
+    option httpclose
+    option forwardfor
+    server 161176-web-01 54.242.163.85:80 check
+    server 161176-web-02 100.25.135.57:80 check
+frontend www-https
+    bind *:443 ssl crt /etc/letsencrypt/live/www.slimany.tech/fullchain.pem
+    mode http
+    default_backend www-backend
+backend www-backend
+    mode http
+    option forwardfor
+    http-request set-header X-Forwarded-Port %[dst_port]
+    http-request add-header X-Forwarded-Proto https if { ssl_fc }
+    server web-server 192.168.0.1:80
+    http-request set-path /
+
+frontend www-https
+    acl url_root path /
+    http-response set-header Content-Security-Policy "default-src 'self'"
+    http-response set-header X-Content-Type-Options "nosniff"
+    http-response set-header X-Frame-Options "DENY"
+    http-response set-header X-XSS-Protection "1; mode=block"
+    http-response set-header Referrer-Policy "same-origin"
+    http-response set-header Feature-Policy "geolocation 'none'; microphone 'none'; camera 'none'"
+    http-response set-header Permissions-Policy "geolocation=(),midi=(),sync-xhr=(),microphone=(),camera=(),magnetometer=(),gyroscope=(),speaker=(),fullscreen=(self),payment=()"
+    http-response add-header Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+    http-response set-header X-Backend-Server web-server
+    http-response set-header Server HAProxy
+    http-response set-header Holberton-School "True"
+    http-request deny unless url_root
