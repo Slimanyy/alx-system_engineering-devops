@@ -1,9 +1,21 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-if [[ $# -eq 0 ]]; then
-  echo "Please provide a username as an argument."
-  exit 1
+username="$1"
+
+# Check if the user exists
+if id "$username" >/dev/null 2>&1; then
+    # Get the home directory of the user
+    home_directory=$(eval echo ~"$username")
+
+    if [ -z "$home_directory" ]; then
+        # User without HOME directory
+        su -c "whoami" -s /bin/bash "$username"
+    else
+        # User with HOME directory
+        su -c "whoami" -s /bin/bash -l "$username"
+    fi
+else
+    echo "Error: User $username does not exist"
+    exit 1
 fi
 
-username=$1
-sudo -u "$username" whoami
