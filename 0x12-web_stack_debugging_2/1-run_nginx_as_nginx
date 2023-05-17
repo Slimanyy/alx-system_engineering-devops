@@ -1,17 +1,12 @@
-#!/bin/bash
+#!/usr/bin/env bash
+# Change ownership of necessary files and directories to nginx user
+sudo chown -R nginx:nginx /var/www/html
+sudo chown -R nginx:nginx /var/lib/nginx
+sudo chown -R nginx:nginx /var/log/nginx
 
-# Install necessary packages
-sudo apt-get update
-sudo apt-get install -y nginx
+# Modify the Nginx configuration file
+sed -i 's/user .*/user nginx;/' /etc/nginx/nginx.conf
+sed -i 's/listen\s*80/listen 8080/' /etc/nginx/sites-available/default
 
-# Stop Nginx service if already running
-sudo service nginx stop
-
-# Configure Nginx to run as nginx user
-sudo sed -i 's/user www-data;/user nginx;/' /etc/nginx/nginx.conf
-
-# Modify Nginx configuration to listen on port 8080
-sudo sed -i 's/listen 80;/listen 8080;/' /etc/nginx/sites-available/default
-
-# Start Nginx service
-sudo service nginx start
+# Restart Nginx service
+sudo service nginx restart
