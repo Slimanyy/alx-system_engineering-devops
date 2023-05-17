@@ -1,6 +1,6 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-# Get the current date
+#get the current date
 date=$(date +'%d-%m-%Y')
 
 # Set the MySQL root password
